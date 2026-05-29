@@ -1,0 +1,14 @@
+# yaml-language-server: $schema=https://aka.ms/azure-dev/azure.yaml.json
+name: acme-frontend
+metadata:
+  template: acme-bank-frontend-template@0.0.1
+infra:
+  provider: bicep
+services:
+  web:
+    project: .
+    language: ts
+    host: containerapp
+    docker:
+      path: ./Dockerfile
+      context: .

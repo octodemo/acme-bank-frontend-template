@@ -1,0 +1,81 @@
+.app-shell {
+  width: min(960px, calc(100% - 2rem));
+  margin: 0 auto;
+  padding: 2rem 0 4rem;
+}
+
+.app-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 0 2rem;
+}
+
+.brand {
+  color: #102a43;
+  font-size: 1.25rem;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.app-nav {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.app-nav a {
+  border-radius: 999px;
+  color: #334e68;
+  padding: 0.5rem 0.85rem;
+  text-decoration: none;
+}
+
+.app-nav a.active,
+.app-nav a:hover {
+  background: #e0f2fe;
+  color: #075985;
+}
+
+.app-main {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.hero,
+.card {
+  background: #ffffff;
+  border: 1px solid #d9e2ec;
+  border-radius: 1rem;
+  box-shadow: 0 16px 32px rgb(16 42 67 / 8%);
+  padding: 2rem;
+}
+
+.eyebrow {
+  color: #0369a1;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  margin: 0 0 0.5rem;
+  text-transform: uppercase;
+}
+
+.status {
+  border-radius: 0.75rem;
+  padding: 1rem;
+}
+
+.status.info {
+  background: #eff6ff;
+  color: #1e40af;
+}
+
+.status.warning {
+  background: #fff7ed;
+  color: #9a3412;
+}
+
+.status.error {
+  background: #fef2f2;
+  color: #991b1b;
+}

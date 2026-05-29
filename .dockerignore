@@ -1,0 +1,12 @@
+.git
+.github
+.azure
+node_modules
+dist
+coverage
+.vscode
+.idea
+.env
+.env.*
+*.log
+README.md

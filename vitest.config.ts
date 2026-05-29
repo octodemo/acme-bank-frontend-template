@@ -1,0 +1,11 @@
+/// <reference types="vitest" />
+import { defineConfig } from 'vitest/config';
+
+export default defineConfig({
+  test: {
+    environment: 'jsdom',
+    include: ['src/**/*.test.ts', 'src/**/*.test.tsx'],
+    setupFiles: ['./src/setup-tests.ts'],
+    exclude: ['node_modules', 'dist'],
+  },
+});
