@@ -8,20 +8,17 @@
     "environmentName": {
       "value": "${AZURE_ENV_NAME}"
     },
-    "managedIdentityResourceId": {
-      "value": "${SHARED_MANAGED_IDENTITY_ID}"
-    },
-    "containerAppsEnvironmentResourceId": {
-      "value": "${SHARED_CONTAINER_APPS_ENV_ID}"
-    },
-    "containerRegistryLoginServer": {
-      "value": "${SHARED_ACR_LOGIN_SERVER}"
-    },
-    "bffBaseUrl": {
-      "value": "${BFF_BASE_URL}"
+    "serviceName": {
+      "value": "${SERVICE_NAME=acme-frontend}"
     },
     "imageName": {
       "value": "${SERVICE_WEB_IMAGE_NAME}"
+    },
+    "containerRegistryName": {
+      "value": "${ACME_CONTAINER_REGISTRY_NAME}"
+    },
+    "bffBaseUrl": {
+      "value": "${ACME_BFF_BASE_URL}"
     }
   }
 }

@@ -1,48 +1,50 @@
-@description('Azure region for the frontend Container App.')
-param location string
+@description('Azure region for the frontend Container App. Defaults to the resource group location.')
+param location string = resourceGroup().location
 
-@description('Azd environment name used to create stable resource names.')
+@description('Acme Bank azd environment name. Must match the existing environment you are joining (for example, dev).')
 @minLength(1)
 @maxLength(32)
 param environmentName string
 
-@description('Frontend service name. Rename this from acme-frontend when creating a real service from the template.')
+@description('Frontend service name. Used for the Container App name, managed identity name, and image name. Rename from acme-frontend when adopting the template.')
 @minLength(2)
 @maxLength(32)
 param serviceName string = 'acme-frontend'
 
-@description('Fully qualified container image name to run, typically supplied by azd as SERVICE_WEB_IMAGE_NAME.')
+@description('Full container image reference including tag or digest. Set automatically by azd as SERVICE_<NAME>_IMAGE_NAME.')
 param imageName string
 
-@description('Resource ID of the shared user-assigned managed identity used by Container Apps and ACR pulls.')
-param managedIdentityResourceId string
-
-@description('Resource ID of the existing Azure Container Apps managed environment to join.')
-param containerAppsEnvironmentResourceId string
-
-@description('Login server of the shared Azure Container Registry, for example acme.azurecr.io.')
-param containerRegistryLoginServer string
+@description('Name of the shared Azure Container Registry. ACR naming is not derived from the environment name so it must be provided explicitly.')
+param containerRegistryName string
 
 @description('External base URL of the existing Acme Bank BFF. nginx substitutes this into the /api reverse proxy at container startup.')
 param bffBaseUrl string
 
+// Shared resource names follow the convention used by the Acme Bank platform
+// repo so this template can locate them with `existing` lookups.
+var namePrefix = take(replace(toLower(environmentName), '-', ''), 12)
+var suffix = uniqueString(resourceGroup().id, environmentName)
+var containerAppsEnvironmentName = 'cae-${namePrefix}-${suffix}'
 var containerAppName = 'ca-${environmentName}-${serviceName}'
-var registryName = split(containerRegistryLoginServer, '.')[0]
-var managedIdentityName = last(split(managedIdentityResourceId, '/'))
-var managedIdentityResourceGroup = split(managedIdentityResourceId, '/')[4]
-var acrPullRoleDefinitionId = subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '7f951dda-4ed3-4680-a7ca-43fe172d538d')
+var managedIdentityName = 'id-${environmentName}-${serviceName}'
+
+resource containerAppsEnvironment 'Microsoft.App/managedEnvironments@2024-03-01' existing = {
+  name: containerAppsEnvironmentName
+}
 
 resource containerRegistry 'Microsoft.ContainerRegistry/registries@2023-07-01' existing = {
-  name: registryName
+  name: containerRegistryName
 }
 
-resource managedIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' existing = {
+resource managedIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' = {
   name: managedIdentityName
-  scope: resourceGroup(managedIdentityResourceGroup)
+  location: location
 }
+
+var acrPullRoleDefinitionId = subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '7f951dda-4ed3-4680-a7ca-43fe172d538d')
 
 resource acrPullAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
-  name: guid(containerRegistry.id, managedIdentity.properties.principalId, 'acr-pull')
+  name: guid(containerRegistry.id, managedIdentity.id, 'acr-pull')
   scope: containerRegistry
   properties: {
     principalId: managedIdentity.properties.principalId
@@ -57,17 +59,17 @@ resource containerApp 'Microsoft.App/containerApps@2024-03-01' = {
   identity: {
     type: 'UserAssigned'
     userAssignedIdentities: {
-      '${managedIdentityResourceId}': {}
+      '${managedIdentity.id}': {}
     }
   }
   properties: {
-    managedEnvironmentId: containerAppsEnvironmentResourceId
+    managedEnvironmentId: containerAppsEnvironment.id
     configuration: {
       activeRevisionsMode: 'Single'
       registries: [
         {
-          server: containerRegistryLoginServer
-          identity: managedIdentityResourceId
+          server: containerRegistry.properties.loginServer
+          identity: managedIdentity.id
         }
       ]
       ingress: {

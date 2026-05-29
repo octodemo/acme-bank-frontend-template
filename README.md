@@ -8,27 +8,26 @@ This template is the Acme Bank paved-road React frontend for IDP demos. It creat
 azd init -t octodemo/acme-bank-frontend-template
 ```
 
-After initialization, rename the literal `acme-frontend` placeholder, set the shared environment values, configure the pipeline, and push your repository:
+## Joining the existing Acme Bank environment
+
+This template provisions only the new frontend Container App, its user-assigned managed identity, and an `AcrPull` role assignment. The Container Apps Environment is looked up by name (`cae-${namePrefix}-${suffix}`) using a Bicep `existing` resource, matching the convention used by [`octodemo/acme-bank`](https://github.com/octodemo/acme-bank).
+
+### One-time bootstrap
 
 ```bash
-azd env set BFF_BASE_URL https://<your-bff-fqdn>
-azd pipeline config
-git push
+azd env new <existing-acme-env-name>
+azd env get-values --cwd ../acme-bank | grep ^ACME_ >> .azure/<existing-acme-env-name>/.env
 ```
 
-## Shared-environment model
+That populates `ACME_CONTAINER_REGISTRY_NAME` and `ACME_BFF_BASE_URL`. `AZURE_LOCATION`, `AZURE_ENV_NAME`, and `SERVICE_WEB_IMAGE_NAME` are set by azd itself.
 
-This template provisions only the new frontend Container App and role assignments. The shared Acme Bank environment must already provide these `azd` or GitHub Actions variables:
+Then deploy:
 
-- `AZURE_LOCATION` — Azure region for the Container App.
-- `AZURE_ENV_NAME` — environment name used in resource naming.
-- `SHARED_MANAGED_IDENTITY_ID` — user-assigned managed identity resource ID used by Container Apps.
-- `SHARED_CONTAINER_APPS_ENV_ID` — existing Container Apps managed environment resource ID.
-- `SHARED_ACR_LOGIN_SERVER` — existing Azure Container Registry login server.
-- `BFF_BASE_URL` — external base URL of the existing Acme Bank BFF, without a trailing `/api`.
-- `SERVICE_WEB_IMAGE_NAME` — full image reference produced by the image build workflow.
+```bash
+azd up
+```
 
-The container starts nginx after substituting `BFF_BASE_URL` into `nginx.conf`. When `BFF_BASE_URL` points at the existing BFF, browser requests to `/api/*` are reverse-proxied to that BFF. For a frontend that does not call a BFF yet, leave the sample query in place as a friendly placeholder until you add a real API integration.
+The container starts nginx after substituting `BFF_BASE_URL` (sourced from `ACME_BFF_BASE_URL`) into `nginx.conf`, so browser requests to `/api/*` are reverse-proxied to the existing acme-bank BFF.
 
 ## Rename `acme-frontend`
 
