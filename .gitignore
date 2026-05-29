@@ -18,12 +18,7 @@ coverage
 .env
 .env.local
 .env.*.local
-# azd state — the demo `dev` env is checked in so `azd init -t ... -e dev`
-# starts with the right resource group / subscription. Any other env name
-# stays local-only.
-.azure/*
-!.azure/dev/
-.azure/dev/*.log
+.azure/
 
 # Editor and OS files
 .vscode/
