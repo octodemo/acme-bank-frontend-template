@@ -2,6 +2,10 @@
 name: acme-frontend
 metadata:
   template: acme-bank-frontend-template@0.0.1
+# Demo default: deploy into the existing Acme Bank resource group so this
+# frontend joins the shared platform. Override by setting AZURE_RESOURCE_GROUP
+# in the azd env.
+resourceGroup: rg-acmebank
 infra:
   provider: bicep
 services:

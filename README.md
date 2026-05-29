@@ -5,29 +5,28 @@ This template is the Acme Bank paved-road React frontend for IDP demos. It creat
 ## Use the template
 
 ```bash
-azd init -t octodemo/acme-bank-frontend-template
-```
-
-## Joining the existing Acme Bank environment
-
-This template provisions only the new frontend Container App, its user-assigned managed identity, and an `AcrPull` role assignment. The Container Apps Environment is looked up by name (`cae-${namePrefix}-${suffix}`) using a Bicep `existing` resource, matching the convention used by [`octodemo/acme-bank`](https://github.com/octodemo/acme-bank).
-
-### One-time bootstrap
-
-```bash
-azd env new <existing-acme-env-name>
-azd env get-values --cwd ../acme-bank | grep ^ACME_ >> .azure/<existing-acme-env-name>/.env
-```
-
-That populates `ACME_CONTAINER_REGISTRY_NAME` and `ACME_BFF_BASE_URL`. `AZURE_LOCATION`, `AZURE_ENV_NAME`, and `SERVICE_WEB_IMAGE_NAME` are set by azd itself.
-
-Then deploy:
-
-```bash
+mkdir <your-frontend> && cd <your-frontend>
+azd init -t octodemo/acme-bank-frontend-template . -e dev
 azd up
 ```
 
-The container starts nginx after substituting `BFF_BASE_URL` (sourced from `ACME_BFF_BASE_URL`) into `nginx.conf`, so browser requests to `/api/*` are reverse-proxied to the existing acme-bank BFF.
+That's it. `azd up` packages the image, provisions infra into the existing Acme Bank resource group, and deploys the new Container App. azd will prompt for an Azure subscription on first run.
+
+## How it joins the existing Acme Bank environment
+
+This template provisions only the new frontend Container App, its user-assigned managed identity, and an `AcrPull` role assignment. The Container Apps Environment is looked up by name (`cae-${namePrefix}-${suffix}`) using a Bicep `existing` resource, matching the convention used by [`octodemo/acme-bank`](https://github.com/octodemo/acme-bank). The shared ACR name and the BFF Container App name are likewise resolved from the same environment — so no environment variables need to be set up front.
+
+The target resource group is set in [`azure.yaml`](./azure.yaml) (`resourceGroup: rg-acmebank`).
+
+The container starts nginx after substituting `BFF_BASE_URL` (resolved from the BFF Container App's FQDN) into `nginx.conf`, so browser requests to `/api/*` are reverse-proxied to the existing acme-bank BFF.
+
+### Reusing this template against a different platform
+
+Override the demo defaults to point at a different shared environment:
+
+- `azure.yaml` → change `resourceGroup` to your platform's resource group.
+- `infra/main.bicep` → change the `containerRegistryName` parameter default.
+- Pass `--parameters bffBaseUrl=https://your-bff` (or set `ACME_BFF_BASE_URL`) if the BFF doesn't follow the `ca-${env}-bff` naming convention.
 
 ## Rename `acme-frontend`
 

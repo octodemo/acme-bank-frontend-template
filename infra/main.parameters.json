@@ -15,10 +15,10 @@
       "value": "${SERVICE_WEB_IMAGE_NAME}"
     },
     "containerRegistryName": {
-      "value": "${ACME_CONTAINER_REGISTRY_NAME}"
+      "value": "${ACME_CONTAINER_REGISTRY_NAME=acmebanke40394e9}"
     },
     "bffBaseUrl": {
-      "value": "${ACME_BFF_BASE_URL}"
+      "value": "${ACME_BFF_BASE_URL=}"
     }
   }
 }

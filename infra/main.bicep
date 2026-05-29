@@ -14,11 +14,11 @@ param serviceName string = 'acme-frontend'
 @description('Full container image reference including tag or digest. Set automatically by azd as SERVICE_<NAME>_IMAGE_NAME.')
 param imageName string
 
-@description('Name of the shared Azure Container Registry. ACR naming is not derived from the environment name so it must be provided explicitly.')
-param containerRegistryName string
+@description('Name of the shared Azure Container Registry. Defaulted to the demo registry; override when reusing the template against a different platform.')
+param containerRegistryName string = 'acmebanke40394e9'
 
-@description('External base URL of the existing Acme Bank BFF. nginx substitutes this into the /api reverse proxy at container startup.')
-param bffBaseUrl string
+@description('External base URL of the existing Acme Bank BFF. Defaults to the BFF Container App in the same environment; override to point at a different backend.')
+param bffBaseUrl string = ''
 
 // Shared resource names follow the convention used by the Acme Bank platform
 // repo so this template can locate them with `existing` lookups.
@@ -27,6 +27,13 @@ var suffix = uniqueString(resourceGroup().id, environmentName)
 var containerAppsEnvironmentName = 'cae-${namePrefix}-${suffix}'
 var containerAppName = 'ca-${environmentName}-${serviceName}'
 var managedIdentityName = 'id-${environmentName}-${serviceName}'
+var bffContainerAppName = 'ca-${environmentName}-bff'
+
+resource bffContainerApp 'Microsoft.App/containerApps@2024-03-01' existing = {
+  name: bffContainerAppName
+}
+
+var resolvedBffBaseUrl = empty(bffBaseUrl) ? 'https://${bffContainerApp.properties.configuration.ingress.fqdn}' : bffBaseUrl
 
 resource containerAppsEnvironment 'Microsoft.App/managedEnvironments@2024-03-01' existing = {
   name: containerAppsEnvironmentName
@@ -87,7 +94,7 @@ resource containerApp 'Microsoft.App/containerApps@2024-03-01' = {
           env: [
             {
               name: 'BFF_BASE_URL'
-              value: bffBaseUrl
+              value: resolvedBffBaseUrl
             }
           ]
           resources: {
