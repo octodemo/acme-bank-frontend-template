@@ -117,5 +117,6 @@ resource containerApp 'Microsoft.App/containerApps@2024-03-01' = {
   ]
 }
 
+output AZURE_CONTAINER_REGISTRY_ENDPOINT string = containerRegistry.properties.loginServer
 output webUrl string = 'https://${containerApp.properties.configuration.ingress.fqdn}'
 output webFqdn string = containerApp.properties.configuration.ingress.fqdn
