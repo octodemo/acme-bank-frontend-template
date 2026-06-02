@@ -15,7 +15,7 @@ param serviceName string = 'acme-frontend'
 param imageName string = 'mcr.microsoft.com/k8se/quickstart:latest'
 
 @description('Name of the shared Azure Container Registry. Defaulted to the demo registry; override when reusing the template against a different platform.')
-param containerRegistryName string = 'acmebanke40394e9'
+param containerRegistryName string = 'acmebankf5f55b09'
 
 @description('External base URL of the existing Acme Bank BFF. Defaults to the BFF Container App in the same environment; override to point at a different backend.')
 param bffBaseUrl string = ''
